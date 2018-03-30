@@ -1,35 +1,32 @@
 # -*- coding: utf-8 -*-
 
-# Define your item pipelines here
-#
-# Don't forget to add your pipeline to the ITEM_PIPELINES setting
-# See: https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 import logging
+import os
+import sys
 
-import redis
-from scrapy.exceptions import DropItem
-from ProxyPool.model import loadSession
+from .model import loadSession
 from scrapy import log
-from ProxyPool.model import proxy
+from .model import proxy
 from pymysql.err import Error as PymsqlError
 
-Redis = redis.StrictRedis(host='localhost', port=6379, db=0)
+DIRNAME = 'item_clean'
+ITEMCLEAN_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), DIRNAME)
+sys.path.append(ITEMCLEAN_DIR)
+file_list = os.listdir(ITEMCLEAN_DIR)
 
 
-# 带完善，得到的item都是列表来的（先判断）
 class ProxypoolPipeline(object):
     def process_item(self, item, spider):
+        file_list = os.listdir(ITEMCLEAN_DIR)
+        for module in file_list:
+            try:
+                if module == (item['rule_name'] + '.py'):
+                    m = __import__(str(module.split('.')[0]))
+                    pipline = getattr(m, 'pipline')
+                    pipline(item)
+            except Exception as e:
+                log.msg('pipline import error: ', e)
         return item
-
-
-class DuplicatesPipline(object):
-    def process_item(self, item, spider):
-        ip_port = item['ip'] + ':' + item['port']
-        if Redis.exists('ip_port:%s' % ip_port):
-            raise DropItem
-        else:
-            Redis.set('ip_port:%s' % ip_port, 1)
-            return item
 
 
 class MysqlPipline(object):
@@ -37,9 +34,9 @@ class MysqlPipline(object):
         if len(item['ip']):
             a = proxy.Proxy(
                 ip=item['ip'],
-                ip_img_url=item['ip'],
+                ip_img_url=item['ip_img_url'],
                 port=item['port'],
-                port_img_url=item['port'],
+                port_img_url=item['port_img_url'],
                 type=item['type'],
                 level=item['level'],
                 location=item['location'],
@@ -47,16 +44,15 @@ class MysqlPipline(object):
                 lifetime=item['lifetime'],
                 lastcheck=item['lastcheck'],
                 source=item['source'],
-                rule_id=item['rule_id'],
+                rule_name=item['rule_name'],
                 update=item['update']
             )
             session = loadSession()
             try:
-                session.add(a)
+                session.merge(a)
                 session.commit()
             except PymsqlError as e:
-                log.msg('Mysql Error: %s ' % str(e), _level=logging.WARNING)
-
+                log.msg('Mysql Error: %s ' % str(e))
             return item
         else:
-            log.msg("ip_port is invalid!", _level=logging.WARNING)
+            log.msg("ip_port is invalid!")

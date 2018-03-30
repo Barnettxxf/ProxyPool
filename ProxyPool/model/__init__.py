@@ -4,9 +4,11 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+__all__ = ['Base', 'engine', 'loadSession']
+
 Base = declarative_base()
 
-engine = create_engine('mysql+pymysql://root:xxf99311@localhost:3306/proxypool?charset=urt8')
+engine = create_engine('mysql+pymysql://root:xxf99311@localhost:3306/proxypool')
 
 
 def loadSession():

@@ -1,18 +1,18 @@
 # -*- coding:utf-8 -*-
 from sqlalchemy import Column, String, Integer
-from sqlalchemy import Sequence
 from . import Base
 
 
 class CrawlRules(Base):
+
     __tablename__ = 'crawlrules'
 
-    id = Column(Integer, Sequence('id', start=1, increment=1), primary_key=True)
-    name = Column(String(100), nullable=False)
-    allow_domains = Column(String(100), nullable=False)
+    name = Column(String(100), nullable=False, primary_key=True)
+    allow_domains = Column(String(100), nullable=False, primary_key=True)
     start_urls = Column(String(500), nullable=False)
     next_page = Column(String(500), nullable=False, default="")
     allow_url =  Column(String(500), nullable=False)
+    deny_url =  Column(String(500), nullable=False)
     extract_from = Column(String(500), nullable=False, default="")
     loop_xpath = Column(String(500), nullable=False)
     ip_xpath = Column(String(500), nullable=False, default="")

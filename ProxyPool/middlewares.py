@@ -3,11 +3,9 @@ import random
 from scrapy.downloadermiddlewares.useragent import UserAgentMiddleware
 from scrapy.http import HtmlResponse
 from selenium import webdriver
-from selenium.webdriver.support.wait import WebDriverWait
-from utils.get_ip import GetIp
 
-t = GetIp()
-
+option = webdriver.ChromeOptions()
+option.set_headless()
 
 class RotateUserAgentMiddleware(UserAgentMiddleware):
     def __init__(self, user_agent=''):
@@ -43,68 +41,27 @@ class RotateUserAgentMiddleware(UserAgentMiddleware):
     ]
 
 
-class RandomProxyMiddleware(object):
-    ip_list = t.ip_list
-    count = 0
-
-    @classmethod
-    def from_crawler(cls, crawler):
-        s = cls()
-        crawler.signals.connect(s.spider_opened, signal=signals.spider_opened)
-        crawler.signals.connect(s.spider_closed, signal=signals.spider_closed)
-        return s
-
-    @staticmethod
-    def change_count():
-        if RandomProxyMiddleware.count <= 30:
-            RandomProxyMiddleware.count += 1
-            return False
-        else:
-            RandomProxyMiddleware.count = 0
-            return True
-
-    def process_request(self, request, spider):
-        if self.change_count():
-            self.ip_list = t.ip_list
-        ip, port = random.choice(self.ip_list)
-        print('new_ip: ', 'https://' + ip + ':' + port)
-        request.meta['proxy'] = 'https://' + ip + ':' + port
-        self.count += 1
-        with open('ip_list.txt', 'a') as f:
-            f.write('-----------------------------------')
-            for line in self.ip_list:
-                f.write(str(line))
-            f.write('\n')
-
-    def spider_opened(self, spider):
-        spider.logger.info('Spider opened: %s' % spider.name)
-
-    def spider_closed(self, spider):
-        spider.logger.info('Spider closed: %s' % spider.name)
-
-
 class SeleniumMiddleware(object):
 
-    def __init__(self, timeout=None, service_args=list()):
+    driver = webdriver.Chrome(chrome_options=option)
+
+    def __init__(self, timeout=10):
         self.timeout = timeout
-        self.service_args = service_args
 
     @classmethod
     def from_crawler(cls, crawler):
-        return cls(timeout=crawler.settings.get('SELENIUM_TIMEOUT'), service_args=crawler.settings.get('SERVICE_ARGS'))
+        return cls(timeout=crawler.settings.get('SELENIUM_TIMEOUT', '10'))
 
     def spider_opened(self, spider):
-        option = webdriver.ChromeOptions()
-        option.set_headless()
-        self.driver = webdriver.Chrome(service_args=self.service_args)
-        self.wait = WebDriverWait(self.driver, self.timeout)
+        self.driver.set_page_load_timeout(self.timeout)
 
     def process_request(self, request, spider):
-        if request.meta.get('selenium'):
-            self.driver.get(request.url)
-            text = self.driver.page_source
-            self.driver.close()
-            return HtmlResponse(url=request.url, body=text, request=request)
+        for rule in spider.rule_list:
+            if rule.allow_domains in request.url and rule.selenium_enable:
+                self.driver.get(request.url)
+                text = self.driver.page_source
+                # self.driver.close()
+                return HtmlResponse(url=request.url, body=text, request=request, encoding='utf-8')
 
     def spider_closed(self):
         self.driver.quit()
