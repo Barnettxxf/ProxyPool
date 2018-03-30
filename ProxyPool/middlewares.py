@@ -7,10 +7,8 @@ from selenium import webdriver
 option = webdriver.ChromeOptions()
 option.set_headless()
 
+
 class RotateUserAgentMiddleware(UserAgentMiddleware):
-    def __init__(self, user_agent=''):
-        super(RotateUserAgentMiddleware, self).__init__(user_agent)
-        self.user_agent = user_agent
 
     def process_request(self, request, spider):
         ua = random.choice(self.user_agent_list)
@@ -56,12 +54,24 @@ class SeleniumMiddleware(object):
         self.driver.set_page_load_timeout(self.timeout)
 
     def process_request(self, request, spider):
-        for rule in spider.rule_list:
-            if rule.allow_domains in request.url and rule.selenium_enable:
-                self.driver.get(request.url)
-                text = self.driver.page_source
-                # self.driver.close()
-                return HtmlResponse(url=request.url, body=text, request=request, encoding='utf-8')
+        try:
+            for rule in spider.rule_list:
+                if rule.allow_domains in request.url and rule.selenium_enable:
+                    return self.download(request)
+        except TimeoutError:
+            return request
+        except:
+            return self.download()
 
     def spider_closed(self):
         self.driver.quit()
+
+    def download(self, request):
+        self.driver.get(request.url)
+        text = self.driver.page_source
+        return HtmlResponse(url=request.url, body=text, request=request, encoding='utf-8')
+
+
+class SplashMiddleware(object):
+    def process_request(self, request, response):
+        pass

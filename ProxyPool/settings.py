@@ -7,7 +7,7 @@ NEWSPIDER_MODULE = 'ProxyPool.spiders'
 
 ROBOTSTXT_OBEY = False
 
-# DOWNLOAD_DELAY = 3
+DOWNLOAD_DELAY = 3
 
 # Disable cookies (enabled by default)
 COOKIES_ENABLED = False
