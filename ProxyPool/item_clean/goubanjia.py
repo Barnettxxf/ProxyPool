@@ -32,7 +32,6 @@ def parse_ip_list_text(ip_list_text):
             text = re_2.search(each).group(1)
         else:
             text = ''
-        # print(text)
         ip += text
     # print('ip: ', ip)
     return ip
