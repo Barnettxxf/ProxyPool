@@ -17,6 +17,8 @@ file_list = os.listdir(ITEMCLEAN_DIR)
 
 class ProxypoolPipeline(object):
     def process_item(self, item, spider):
+
+        # 自定义清理模块
         file_list = os.listdir(ITEMCLEAN_DIR)
         for module in file_list:
             try:
@@ -26,6 +28,12 @@ class ProxypoolPipeline(object):
                     pipline(item)
             except Exception as e:
                 log.msg('pipline import error: ', e)
+
+        # 通用清理模块
+        m2 = __import__('usual')
+        pipline2 = getattr(m2, 'pipline')
+        pipline2(item)
+
         return item
 
 

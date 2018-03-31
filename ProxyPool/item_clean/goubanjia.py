@@ -8,16 +8,6 @@ def pipline(item):
     item['ip'] = parse_ip_list_text(ip_list_text)
     item['port'] = re.search('>(\d+)</span>', item['port'][-1]).group(1)
     item['lastcheck'] = parse_date_time(item['lastcheck'][0])
-    if len(item['speed']) != 0:
-        item['speed'] = item['speed'][0].split('秒')[0].strip()
-
-    for key in item:
-        if isinstance(item[key], list) and len(item[key]) != 0:
-            item[key] = item[key][0]
-        elif isinstance(item[key], list) and len(item[key]) == 0:
-            item[key] = ''
-        else:
-            pass
 
 
 def parse_ip_list_text(ip_list_text):

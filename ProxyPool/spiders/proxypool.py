@@ -16,12 +16,12 @@ rules = session.query(CrawlRules).filter(CrawlRules.enable == 1)
 
 class ProxypoolSpider(CrawlSpider):
     name = 'proxypool'
-    allowed_domains = ['www.xicidaili.com']
+    allowed_domains = []
     # redis_url = 'proxypool:start_url'
 
     def __init__(self, *a, **kw):
         global rules
-        self.rule_list = rules
+        self.rule = rules
         self.names = [rule.name for rule in rules]
         self.selenium_enable = [rule.selenium_enable for rule in rules]
         self.allowed_domains = [rule.allow_domains for rule in rules]
@@ -41,8 +41,7 @@ class ProxypoolSpider(CrawlSpider):
                 deny_url = ()
             else:
                 deny_url = rule.deny_url.split(',')
-            rule_list.append(Rule(LinkExtractor(allow=allow_url, deny=deny_url,
-                                                unique=True),
+            rule_list.append(Rule(LinkExtractor(allow=allow_url, deny=deny_url,),
                                                 follow=True,
                                                 callback='parse_item'))
         self.rules = tuple(rule_list)
@@ -50,7 +49,7 @@ class ProxypoolSpider(CrawlSpider):
 
     def parse_item(self, response):
         item = ProxypoolItem()
-        for rule in self.rule_list:
+        for rule in self.rule:
             if rule.allow_domains in response.url:
                 table = response.xpath(rule.loop_xpath)
                 for proxy in table:

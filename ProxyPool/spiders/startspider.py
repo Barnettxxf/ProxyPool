@@ -8,8 +8,8 @@ from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
 from ProxyPool import settings
 from ProxyPool.items import ProxypoolItem
-from model import loadSession
-from model.rules import CrawlRules
+from ProxyPool.model import loadSession
+from ProxyPool.model.rules import CrawlRules
 
 
 class StartspiderSpider(scrapy.Spider):
@@ -43,18 +43,29 @@ class StartspiderSpider(scrapy.Spider):
 class ProxySpider(CrawlSpider):
 
     def __init__(self, rule, *a, **kw):
-        self.rule = rule
+        self.rule = [rule, ]
         self.name = rule.name
 
-        self.allowed_domains = rule.allowed_domains.split(',')
+        self.allowed_domains = rule.allow_domains.split(',')
         self.start_urls = rule.start_urls.split(',')
         rule_list = []
 
         if len(rule.next_page):
             rule_list.append(Rule(LinkExtractor(restrict_xpaths=rule.next_page), follow=True))
 
+        if ',' not in rule.allow_url:
+            allow_url = (rule.allow_url,)
+        else:
+            allow_url = rule.allow_url.split(',')
+        if ',' not in rule.deny_url:
+            deny_url = (rule.deny_url,)
+        elif len(rule.deny_url) == 0:
+            deny_url = ()
+        else:
+            deny_url = rule.deny_url.split(',')
         rule_list.append(Rule(LinkExtractor(
-            allow=rule.allow_url.split(','),
+            allow=allow_url,
+            deny=deny_url,
             unique=True),
             follow=True,
             callback='parse_item'))
@@ -64,55 +75,55 @@ class ProxySpider(CrawlSpider):
 
     def parse_item(self, response):
         item = ProxypoolItem()
-        table = response.xpath(self.rule.loop_xpath)
+        table = response.xpath(self.rule[0].loop_xpath)
         for proxy in table:
-            if len(self.rule.ip_xpath):
-                item['ip'] = proxy.xpath(self.rule.ip_xpath).extract()
+            if len(self.rule[0].ip_xpath):
+                item['ip'] = proxy.xpath(self.rule[0].ip_xpath).extract()
             else:
                 item['ip'] = ''
-            if len(self.rule.ip_img_xpath):
-                item['ip_img_url'] = proxy.xpath(self.rule.ip_img_xpath).extract()
+            if len(self.rule[0].ip_img_xpath):
+                item['ip_img_url'] = proxy.xpath(self.rule[0].ip_img_xpath).extract()
             else:
                 item['ip_img_url'] = ''
-            if len(self.rule.port_xpath):
-                item['port'] = proxy.xpath(self.rule.port_xpath).extract()
+            if len(self.rule[0].port_xpath):
+                item['port'] = proxy.xpath(self.rule[0].port_xpath).extract()
             else:
                 item['port'] = ''
-            if len(self.rule.port_img_xpath):
-                item['port_img_url'] = proxy.xpath(self.rule.port_img_xpath).extract()
+            if len(self.rule[0].port_img_xpath):
+                item['port_img_url'] = proxy.xpath(self.rule[0].port_img_xpath).extract()
             else:
                 item['port_img_url'] = ''
-            if len(self.rule.location1_xpath):
-                location = proxy.xpath(self.rule.location1_xpath).extract()
+            if len(self.rule[0].location1_xpath):
+                location = proxy.xpath(self.rule[0].location1_xpath).extract()
                 if location is None:
                     location = []
-                if len(self.rule.location2_xpath):
-                    location.extend(proxy.xpath(self.rule.location2_xpath).extract())
+                if len(self.rule[0].location2_xpath):
+                    location.extend(proxy.xpath(self.rule[0].location2_xpath).extract())
                 item['location'] = location
             else:
                 item['location'] = ''
-            if len(self.rule.lifetime_xpath):
-                item['lifetime'] = proxy.xpath(self.rule.lifetime_xpath).extract()
+            if len(self.rule[0].lifetime_xpath):
+                item['lifetime'] = proxy.xpath(self.rule[0].lifetime_xpath).extract()
             else:
                 item['lifetime'] = ''
-            if len(self.rule.lastcheck_xpath):
-                item['lastcheck'] = proxy.xpath(self.rule.lastcheck_xpath).extract()
+            if len(self.rule[0].lastcheck_xpath):
+                item['lastcheck'] = proxy.xpath(self.rule[0].lastcheck_xpath).extract()
             else:
                 item['lastcheck'] = ''
-            if len(self.rule.type_xpath):
-                item['type'] = proxy.xpath(self.rule.type_xpath).extract()
+            if len(self.rule[0].type_xpath):
+                item['type'] = proxy.xpath(self.rule[0].type_xpath).extract()
             else:
                 item['type'] = ''
-            if len(self.rule.speed_xpath):
-                item['speed'] = proxy.xpath(self.rule.speed_xpath).extract()
+            if len(self.rule[0].speed_xpath):
+                item['speed'] = proxy.xpath(self.rule[0].speed_xpath).extract()
             else:
                 item['speed'] = ''
-            if len(self.rule.level_xpath):
-                item['level'] = proxy.xpath(self.rule.level_xpath).extract()
+            if len(self.rule[0].level_xpath):
+                item['level'] = proxy.xpath(self.rule[0].level_xpath).extract()
             else:
                 item['level'] = ''
 
-            item['rule_name'] = self.rule.name
+            item['rule_name'] = self.rule[0].name
             item['source'] = response.url
             item['update'] = str(datetime.datetime.now()).split('.')[0]
             yield item

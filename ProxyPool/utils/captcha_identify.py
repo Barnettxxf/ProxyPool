@@ -6,6 +6,10 @@ import hashlib
 import string
 
 
+DIRNAME = 'iconset'
+ICONDIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), DIRNAME)
+
+
 class VectorCompare():
     def magnitude(self, concordance):
         total = 0
@@ -40,10 +44,10 @@ for i in string.digits:
 imageset = []
 
 for letter in iconset:
-    for img in os.listdir('./iconset/%s' % letter):
+    for img in os.listdir(ICONDIR + '/%s' % letter):
         temp = []
         if '.png' in img:
-            temp.append(buildvector(Image.open('./iconset/%s/%s' % (letter, img))))
+            temp.append(buildvector(Image.open(ICONDIR + '/%s/%s' % (letter, img))))
         imageset.append({letter: temp})
 # print(imageset)
 

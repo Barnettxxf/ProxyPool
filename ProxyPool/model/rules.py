@@ -28,5 +28,9 @@ class CrawlRules(Base):
     lastcheck_xpath = Column(String(500), nullable=False, default="")
     enable = Column(Integer, nullable=False, default=1)
     selenium_enable = Column(Integer, nullable=False, default=0)
+    proxy_require = Column(Integer, nullable=False, default=0)
+    straight_request = Column(Integer, nullable=False, default=0)
+
+
 
 

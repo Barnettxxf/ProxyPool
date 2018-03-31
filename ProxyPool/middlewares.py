@@ -1,12 +1,16 @@
 # -*- coding: utf-8 -*-
 import random
+
+import requests
+from scrapy import signals
 from scrapy.downloadermiddlewares.useragent import UserAgentMiddleware
 from scrapy.http import HtmlResponse
 from selenium import webdriver
+from utils.get_ip import GetIp
 
 option = webdriver.ChromeOptions()
 option.set_headless()
-
+t = GetIp()
 
 class RotateUserAgentMiddleware(UserAgentMiddleware):
 
@@ -54,14 +58,14 @@ class SeleniumMiddleware(object):
         self.driver.set_page_load_timeout(self.timeout)
 
     def process_request(self, request, spider):
-        try:
-            for rule in spider.rule_list:
-                if rule.allow_domains in request.url and rule.selenium_enable:
-                    return self.download(request)
-        except TimeoutError:
-            return request
-        except:
-            return self.download()
+        # try:
+        for rule in spider.rule_list:
+            if rule.allow_domains in request.url and rule.selenium_enable:
+                return self.download(request)
+        # except TimeoutError:
+        #     return request
+        # except AttributeError:
+        #     return self.download()
 
     def spider_closed(self):
         self.driver.quit()
@@ -73,5 +77,55 @@ class SeleniumMiddleware(object):
 
 
 class SplashMiddleware(object):
-    def process_request(self, request, response):
+    def process_request(self, request, spider):
         pass
+
+
+class StraightMiddleware(object):
+    def process_request(self, request, spider):
+        for rule in spider.rule:
+            if rule.allow_domains in request.url and rule.straight_request:
+                text = requests.get(request.url, headers=request.headers).text
+                return HtmlResponse(url=request.url, body=text, request=request, encoding='utf-8')
+
+
+class RandomProxyMiddleware(object):
+
+    ip_list = t.ip_list
+    count = 0
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        s = cls()
+        crawler.signals.connect(s.spider_opened, signal=signals.spider_opened)
+        crawler.signals.connect(s.spider_closed, signal=signals.spider_closed)
+        return s
+
+    @staticmethod
+    def change_count():
+        if RandomProxyMiddleware.count <= 200:
+            RandomProxyMiddleware.count += 1
+            return False
+        else:
+            RandomProxyMiddleware.count = 0
+            return True
+
+    def process_request(self, request, spider):
+        for rule in spider.rule_list:
+            if rule.allow_domains in request.url and rule.proxy_require:
+                if self.change_count():
+                    self.ip_list = t.ip_list
+                    with open('ip_list.txt', 'a') as f:
+                        f.write('-----------------------------------')
+                        for line in self.ip_list:
+                            f.write(str(line))
+                        f.write('\n')
+                ip, port = random.choice(self.ip_list)
+                print('new_ip: ', 'https://' + ip + ':' + port)
+                request.meta['proxy'] = 'https://' + ip + ':' + port
+
+    def spider_opened(self, spider):
+        spider.logger.info('Spider opened: %s' % spider.name)
+
+    def spider_closed(self, spider):
+        spider.logger.info('Spider closed: %s' % spider.name)
