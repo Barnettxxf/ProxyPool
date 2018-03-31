@@ -16,7 +16,7 @@ rules = session.query(CrawlRules).filter(CrawlRules.enable == 1)
 
 class ProxypoolSpider(CrawlSpider):
     name = 'proxypool'
-    allowed_domains = []
+    # allowed_domains = []
     # redis_url = 'proxypool:start_url'
 
     def __init__(self, *a, **kw):

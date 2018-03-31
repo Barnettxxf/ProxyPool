@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-
 
-from utils.common import MysqlConnection
+from .common import MysqlConnection
 
 
 class GetIp(MysqlConnection):

@@ -6,7 +6,7 @@ from scrapy import signals
 from scrapy.downloadermiddlewares.useragent import UserAgentMiddleware
 from scrapy.http import HtmlResponse
 from selenium import webdriver
-from utils.get_ip import GetIp
+from .utils.get_ip import GetIp
 
 option = webdriver.ChromeOptions()
 option.set_headless()
@@ -59,7 +59,7 @@ class SeleniumMiddleware(object):
 
     def process_request(self, request, spider):
         # try:
-        for rule in spider.rule_list:
+        for rule in spider.rule:
             if rule.allow_domains in request.url and rule.selenium_enable:
                 return self.download(request)
         # except TimeoutError:
@@ -85,7 +85,9 @@ class StraightMiddleware(object):
     def process_request(self, request, spider):
         for rule in spider.rule:
             if rule.allow_domains in request.url and rule.straight_request:
-                text = requests.get(request.url, headers=request.headers).text
+                headers = random.choice(RotateUserAgentMiddleware.user_agent_list)
+                url = request.url
+                text = requests.get(url=url, headers={'User-Agent': headers}).text
                 return HtmlResponse(url=request.url, body=text, request=request, encoding='utf-8')
 
 
@@ -111,7 +113,7 @@ class RandomProxyMiddleware(object):
             return True
 
     def process_request(self, request, spider):
-        for rule in spider.rule_list:
+        for rule in spider.rule:
             if rule.allow_domains in request.url and rule.proxy_require:
                 if self.change_count():
                     self.ip_list = t.ip_list

@@ -17,8 +17,8 @@ class StartspiderSpider(scrapy.Spider):
     allowed_domains = ['www.baidu.com']
     start_urls = []
 
-    def __init__(self, name, **kwargs):
-        super(StartspiderSpider, self).__init__(name, **kwargs)
+    def __init__(self):
+        super(StartspiderSpider, self).__init__()
         self.start_rulespider()
 
     def parse(self, response):
@@ -37,10 +37,13 @@ class StartspiderSpider(scrapy.Spider):
         rules = session.query(CrawlRules).filter(CrawlRules.enable == 1)
         for rule in rules:
             process.crawl(ProxySpider, rule)
+            print('crawl rule: ', rule.name)
         process.start()
 
 
 class ProxySpider(CrawlSpider):
+
+    name = 'magic'
 
     def __init__(self, rule, *a, **kw):
         self.rule = [rule, ]

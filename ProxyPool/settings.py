@@ -7,7 +7,7 @@ NEWSPIDER_MODULE = 'ProxyPool.spiders'
 
 ROBOTSTXT_OBEY = False
 
-DOWNLOAD_DELAY = 3
+DOWNLOAD_DELAY = 0.1
 
 # Disable cookies (enabled by default)
 COOKIES_ENABLED = False
@@ -33,8 +33,9 @@ DOWNLOADER_MIDDLEWARES = {
     'scrapy.contrib.downloadermiddleware.useragent.UserAgentMiddleware': None,
     # 'scrapy.contrib.downloadermiddleware.cookies.CookiesMiddleware': None,
     'ProxyPool.middlewares.RotateUserAgentMiddleware': 400,
-    # 'ProxyPool.middlewares.RandomProxyMiddleware': 750,
+    'ProxyPool.middlewares.RandomProxyMiddleware': 750,
     'ProxyPool.middlewares.SeleniumMiddleware': 360,
+    'ProxyPool.middlewares.StraightMiddleware': 410,
 }
 
 
@@ -77,5 +78,5 @@ ITEM_PIPELINES = {
 # SCHEDULER_DUPEFILTER_KEY = '%(spider)s:dupefilter'                  # 去重规则，在redis中保存时对应的key
 # SCHEDULER_DUPEFILTER_CLASS = 'scrapy_redis.dupefilter.RFPDupeFilter'# 去重规则对应处理的类
 
-# LOG_FILE = 'lagou_temp.log'
+# LOG_FILE = 'proxypool.log'
 

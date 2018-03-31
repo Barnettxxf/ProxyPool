@@ -4,6 +4,7 @@ import logging
 import os
 import sys
 
+from .items import ProxypoolItem
 from .model import loadSession
 from scrapy import log
 from .model import proxy
@@ -27,7 +28,7 @@ class ProxypoolPipeline(object):
                     pipline = getattr(m, 'pipline')
                     pipline(item)
             except Exception as e:
-                log.msg('pipline import error: ', e)
+                print('pipline import error: ', e)
 
         # 通用清理模块
         m2 = __import__('usual')
@@ -40,27 +41,40 @@ class ProxypoolPipeline(object):
 class MysqlPipline(object):
     def process_item(self, item, spider):
         if len(item['ip']):
-            a = proxy.Proxy(
-                ip=item['ip'],
-                ip_img_url=item['ip_img_url'],
-                port=item['port'],
-                port_img_url=item['port_img_url'],
-                type=item['type'],
-                level=item['level'],
-                location=item['location'],
-                speed=item['speed'],
-                lifetime=item['lifetime'],
-                lastcheck=item['lastcheck'],
-                source=item['source'],
-                rule_name=item['rule_name'],
-                update=item['update']
-            )
-            session = loadSession()
-            try:
-                session.merge(a)
-                session.commit()
-            except PymsqlError as e:
-                log.msg('Mysql Error: %s ' % str(e))
-            return item
+            if isinstance(item['ip'], list):
+                new = ProxypoolItem()
+                for key in item:
+                    if len(item[key]) < 2:
+                        new[key] = item[key]
+                    else:
+                        new[key] = item[key].pop()
+                self.save(new)
+            else:
+                self.save(item)
         else:
-            log.msg("ip_port is invalid!")
+            print("ip_port is invalid!")
+
+    def save(self, item):
+        a = proxy.Proxy(
+            ip=item['ip'],
+            ip_img_url=item['ip_img_url'],
+            port=item['port'],
+            port_img_url=item['port_img_url'],
+            type=item['type'],
+            level=item['level'],
+            location=item['location'],
+            speed=item['speed'],
+            lifetime=item['lifetime'],
+            lastcheck=item['lastcheck'],
+            source=item['source'],
+            rule_name=item['rule_name'],
+            update=item['update']
+        )
+        session = loadSession()
+        try:
+            session.merge(a)
+            session.commit()
+        except PymsqlError as e:
+            print('Mysql Error: %s ' % str(e))
+        return item
+
