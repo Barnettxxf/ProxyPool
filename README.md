@@ -88,9 +88,9 @@
 | level_xpath      | xpath表达式，指向level的xpath                                |
 | lastcheck_xpath  | xpath表达式，指向lastcheck的xpath                            |
 | enable           | xpath表达式，是否启用该爬取规则，1为启用，0为禁用            |
-| selenium_enable  | xpath表达式，是否使用selelnium中间件下载网页（准备改为用splash服务来渲染js页面...） |
-| proxy_require    | xpath表达式，是否需要使用代理爬取(需要将该模块的配置指向自己的数据库才能用) |
-| straight_request | xpath表达式，是否用requests模块直接请求（准备弃用...）       |
+| selenium_enable  | xpath表达式，是否使用selelnium中间件下载网页（准备改为用splash服务来渲染js页面...），1为启用，0为禁用 |
+| proxy_require    | xpath表达式，是否需要使用代理爬取(需要将该模块的配置指向自己的数据库才能用)，1为启用，0为禁用 |
+| straight_request | xpath表达式，是否用requests模块直接请求（准备弃用...），1为启用，0为禁用 |
 
 ​	其中name，allow_domains， start_urls，allow_url，deny_url， loop_xpath， ip_xpath是必须有的，否则整个程序不能正常进行。
 
@@ -104,7 +104,7 @@
 
   `scrapy shell yoururl --spider=proxypool`
 
-​	
+	​	
 
 #### 添加item整理规则
 
