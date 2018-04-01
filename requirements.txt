@@ -1,0 +1,9 @@
+requests==2.18.4
+selenium==3.9.0
+scrapy_redis==0.6.8
+Scrapy==1.5.0
+PyMySQL==0.8.0
+SQLAlchemy==1.2.5
+redis==2.10.6
+Pillow==5.0.0
+

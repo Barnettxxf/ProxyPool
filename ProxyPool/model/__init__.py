@@ -3,12 +3,19 @@
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from .config import *
+
+username = USERNAME
+password = PASSWORD
+host = HOST
+port = PORT
+db = DATEBASE
 
 __all__ = ['Base', 'engine', 'loadSession']
 
 Base = declarative_base()
 
-engine = create_engine('mysql+pymysql://root:xxf99311@localhost:3306/proxypool')
+engine = create_engine(f'mysql+pymysql://{username}:{password}@{host}:{port}/{db}')
 
 
 def loadSession():
