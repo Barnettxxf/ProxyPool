@@ -43,6 +43,9 @@ def parse_time(time_text):
     elif '小时' in time_text:
         dig = int(re.search('(.*?)(小时前|小时)', time_text).group(1))
         yes_time = now_time + datetime.timedelta(hours=-dig)
+    elif '天' in time_text:
+        dig = int(re.search('(.*?)(天前|天)', time_text).group(1))
+        yes_time = now_time + datetime.timedelta(days=-dig)
     elif '验证时间' in time_text:
         raise DropItem
     else:

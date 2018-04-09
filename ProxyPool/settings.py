@@ -80,3 +80,8 @@ ITEM_PIPELINES = {
 
 # LOG_FILE = 'proxypool.log'
 
+SELENIUM_TIMEOUT = 5
+# Scrapy downloader 并发请求(concurrent requests)的最大值。
+CONCURRENT_REQUESTS = 32
+# 对单个网站进行并发请求的最大值
+CONCURRENT_REQUESTS_PER_DOMAIN = 16

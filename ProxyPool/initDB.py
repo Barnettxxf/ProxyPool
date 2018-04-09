@@ -1,7 +1,8 @@
 # -*- coding:utf-8 -*-
 from model import Base, engine, loadSession
 from model.rules import CrawlRules
-from model.proxy import Proxy           # 一定要导入此模块，不然proxy表不会在mysql里生成
+from model.proxy import Proxy  # 一定要导入此模块，不然proxy表不会在mysql里生成
+from model.available import FilterIP
 
 Base.metadata.create_all(engine)
 session = loadSession()
@@ -35,10 +36,10 @@ def commit_data(item):
 item_xici = CrawlRules()
 item_xici.name = 'xicidaili'
 item_xici.allow_domains = 'www.xicidaili.com'
-item_xici.start_urls = 'http://www.xicidaili.com/wn/2'  #  这里需要取巧下，才能取到第一页(只要第一页)
+item_xici.start_urls = 'http://www.xicidaili.com/wn/2'  # 这里需要取巧下，才能取到第一页(只要第一页)
 item_xici.next_page = ''
-item_xici.allow_url = '^wn/1$'
-item_xici.deny_url = 'wn/[0,2-9]+'
+item_xici.allow_url = '(wn/1)$'
+item_xici.deny_url = '2017.*?,2018.*?,nt,qq,wt'
 item_xici.extract_from = ''
 item_xici.loop_xpath = '//*[@id="ip_list"]/tr[position()>1]'
 item_xici.ip_xpath = './td[2]/text()'
@@ -95,7 +96,7 @@ item_mimvp.allow_url = 'free.php$'
 item_mimvp.deny_url = 'product,price,fetchopen,stat,usercenter/,about'
 item_mimvp.extract_from = ''
 item_mimvp.loop_xpath = '//table//td'
-item_mimvp.ip_xpath = '//*[@class="tbl-proxy-ip"]/text()'  #//*[@id="mimvp-body"]/div[2]/div/table/tbody/tr[1]/td[2]
+item_mimvp.ip_xpath = '//*[@class="tbl-proxy-ip"]/text()'  # //*[@id="mimvp-body"]/div[2]/div/table/tbody/tr[1]/td[2]
 item_mimvp.ip_img_xpathxpath = ''
 item_mimvp.port_xpath = ''
 item_mimvp.port_img_xpath = '//*[@class="tbl-proxy-port"]/img/@src'
@@ -112,7 +113,6 @@ item_mimvp.proxy_require = 0
 item_mimvp.straight_request = 1
 commit_data(item_mimvp)
 
-
 # --------------------------kuaidaili------------------------------------------------
 item_kuaidaili = CrawlRules()
 item_kuaidaili.name = 'kuaidaili'
@@ -120,7 +120,7 @@ item_kuaidaili.allow_domains = 'www.kuaidaili.com'
 item_kuaidaili.start_urls = 'https://www.kuaidaili.com/ops/proxylist/'
 item_kuaidaili.next_page = ''
 item_kuaidaili.allow_url = 'ops/proxylist/\d+/$'
-item_kuaidaili.deny_url = 'free/.*?,pricing/.*?,dps/.*?,apidocs/.*?,fetch/.*?'
+item_kuaidaili.deny_url = 'free/.*?,pricing/.*?,dps/.*?,apidocs/.*?,fetch/.*?,free/area,free'
 item_kuaidaili.extract_from = ''
 item_kuaidaili.loop_xpath = '//*[@id="freelist"]/table/tbody/tr'
 item_kuaidaili.ip_xpath = './td[1]/text()'
@@ -139,7 +139,6 @@ item_kuaidaili.selenium_enable = 0
 item_kuaidaili.proxy_require = 0
 item_kuaidaili.straight_request = 0
 commit_data(item_kuaidaili)
-
 
 # --------------------------swei360------------------------------------------------
 item_swei360 = CrawlRules()
@@ -168,7 +167,6 @@ item_swei360.proxy_require = 0
 item_swei360.straight_request = 0
 commit_data(item_swei360)
 
-
 # --------------------------free-proxy-list------------------------------------------------
 item_freeproxylist = CrawlRules()
 item_freeproxylist.name = 'freeproxylist'
@@ -192,19 +190,18 @@ item_freeproxylist.level_xpath = ''
 item_freeproxylist.lastcheck_xpath = './td[8]/text()'
 item_freeproxylist.enable = 0
 item_freeproxylist.selenium_enable = 0
-item_freeproxylist.proxy_require = 1      # 这个网站需要翻墙的，需要能翻墙的IP
+item_freeproxylist.proxy_require = 1  # 这个网站需要翻墙的，需要能翻墙的IP
 item_freeproxylist.straight_request = 0
 commit_data(item_freeproxylist)
-
 
 # --------------------------data5u------------------------------------------------
 item_data5u = CrawlRules()
 item_data5u.name = 'data5u'
 item_data5u.allow_domains = 'www.data5u.com'
-item_data5u.start_urls = 'http://www.data5u.com/free/index.shtml'
+item_data5u.start_urls = 'http://www.data5u.com/free/index.html'
 item_data5u.next_page = ''
-item_data5u.allow_url = 'free/.{1,4}/(index.shtml)$'
-item_data5u.deny_url = 'vipip/,buy/,api/,download/,help/'
+item_data5u.allow_url = 'free/gngn/.*,free/gnpt/.*,free/gwgn/.*,free/gwpt/.*'  # (.*?)/(index.shtml)$
+item_data5u.deny_url = 'api/,download/,help/'
 item_data5u.extract_from = ''
 item_data5u.loop_xpath = '/html/body/div[5]/ul/li[2]/ul'
 item_data5u.ip_xpath = './span[1]/li/text()'
@@ -223,7 +220,6 @@ item_data5u.selenium_enable = 0
 item_data5u.proxy_require = 0
 item_data5u.straight_request = 0
 commit_data(item_data5u)
-
 
 # --------------------------hidemy------------------------------------------------
 item_hidemy = CrawlRules()
@@ -248,6 +244,6 @@ item_hidemy.level_xpath = ''
 item_hidemy.lastcheck_xpath = './span[9]/li/text()'
 item_hidemy.enable = 0
 item_hidemy.selenium_enable = 0
-item_hidemy.proxy_require = 1           # 这个网站需要翻墙的，需要能翻墙的IP
+item_hidemy.proxy_require = 1  # 这个网站需要翻墙的，需要能翻墙的IP
 item_hidemy.straight_request = 0
 commit_data(item_hidemy)

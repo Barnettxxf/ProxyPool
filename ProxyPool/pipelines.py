@@ -53,6 +53,7 @@ class MysqlPipline(object):
                 self.save(item)
         else:
             print("ip_port is invalid!")
+        return item
 
     def save(self, item):
         a = proxy.Proxy(
@@ -76,5 +77,4 @@ class MysqlPipline(object):
             session.commit()
         except PymsqlError as e:
             print('Mysql Error: %s ' % str(e))
-        return item
 

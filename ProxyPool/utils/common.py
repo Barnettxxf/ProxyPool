@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 
 import pymysql
-from .config_MySQL import MyAliyunServer as CONFIG
+from .config_MySQL import LOCALCONFIG as CONFIG
 
 
 class MysqlConnection(object):

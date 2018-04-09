@@ -47,15 +47,17 @@ class SeleniumMiddleware(object):
 
     driver = webdriver.Chrome(chrome_options=option)
 
-    def __init__(self, timeout=10):
+    def __init__(self, timeout=10, script_timeout=20):
         self.timeout = timeout
+        self.script_timeout = script_timeout
 
     @classmethod
     def from_crawler(cls, crawler):
-        return cls(timeout=crawler.settings.get('SELENIUM_TIMEOUT', '10'))
+        return cls(timeout=crawler.settings.get('SELENIUM_TIMEOUT', 10), script_timeout=crawler.settings.get('selenium_script_timeout', 20))
 
     def spider_opened(self, spider):
         self.driver.set_page_load_timeout(self.timeout)
+        self.driver.set_script_timeout(self.script_timeout)
 
     def process_request(self, request, spider):
         # try:

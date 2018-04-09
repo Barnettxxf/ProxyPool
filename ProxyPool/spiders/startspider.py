@@ -11,15 +11,22 @@ from ProxyPool.items import ProxypoolItem
 from ProxyPool.model import loadSession
 from ProxyPool.model.rules import CrawlRules
 
-
 class StartspiderSpider(scrapy.Spider):
     name = 'startspider'
     allowed_domains = ['www.baidu.com']
     start_urls = []
 
+    custom_settings = {
+        'DOWNLOADER_MIDDLEWARES': {},
+    }
+
     def __init__(self):
         super(StartspiderSpider, self).__init__()
         self.start_rulespider()
+        self.close(StartspiderSpider, reason='finished')
+
+    def start_requests(self):
+        pass
 
     def parse(self, response):
         pass
@@ -42,7 +49,6 @@ class StartspiderSpider(scrapy.Spider):
 
 
 class ProxySpider(CrawlSpider):
-
     name = 'magic'
 
     def __init__(self, rule, *a, **kw):
@@ -130,4 +136,3 @@ class ProxySpider(CrawlSpider):
             item['source'] = response.url
             item['update'] = str(datetime.datetime.now()).split('.')[0]
             yield item
-
