@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 import datetime
+import logging
+import os
 
 import scrapy
 from scrapy.crawler import CrawlerProcess
@@ -10,6 +12,7 @@ from ProxyPool import settings
 from ProxyPool.items import ProxypoolItem
 from ProxyPool.model import loadSession
 from ProxyPool.model.rules import CrawlRules
+
 
 class StartspiderSpider(scrapy.Spider):
     name = 'startspider'
@@ -23,15 +26,14 @@ class StartspiderSpider(scrapy.Spider):
     def __init__(self):
         super(StartspiderSpider, self).__init__()
         self.start_rulespider()
-        self.close(StartspiderSpider, reason='finished')
-
-    def start_requests(self):
-        pass
+        scrapy.Spider.close(StartspiderSpider, reason='finished')
 
     def parse(self, response):
+        """ do nothing """
         pass
 
     def start_rulespider(self):
+        """ start all rules spider in CrawlRule """
         my_settings = Settings()
         my_settings.set("ITEM_PIPELINES", settings.ITEM_PIPELINES)
         my_settings.set("DOWNLOADER_MIDDLEWARES", settings.DOWNLOADER_MIDDLEWARES)
@@ -47,11 +49,21 @@ class StartspiderSpider(scrapy.Spider):
             print('crawl rule: ', rule.name)
         process.start()
 
+    @staticmethod
+    def closed(reason):
+        """ shutdown abort startspider, or it will raise exception ... """
+        from _signal import SIGKILL
+        msg = 'Spider close: ' + StartspiderSpider.name + '(%s)' % reason
+        logging.info(msg)
+        pid = os.getpid()
+        os.kill(pid, SIGKILL)
+
 
 class ProxySpider(CrawlSpider):
     name = 'magic'
 
     def __init__(self, rule, *a, **kw):
+        """ create all spider by rules """
         self.rule = [rule, ]
         self.name = rule.name
 
@@ -83,6 +95,7 @@ class ProxySpider(CrawlSpider):
         super(ProxySpider, self).__init__(*a, **kw)
 
     def parse_item(self, response):
+        """ usual html parse function """
         item = ProxypoolItem()
         table = response.xpath(self.rule[0].loop_xpath)
         for proxy in table:
