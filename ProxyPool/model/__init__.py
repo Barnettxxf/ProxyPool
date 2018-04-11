@@ -23,3 +23,4 @@ def loadSession():
     Session = scoped_session(session_factory)
     session = Session()
     return session
+

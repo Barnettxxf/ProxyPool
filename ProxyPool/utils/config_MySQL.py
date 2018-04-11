@@ -13,12 +13,12 @@ LOCALCONFIG = {
     'charset': 'utf8'
 }
 
-MyAliyunServer = {
-    'host': '39.108.175.25',
+AliyunServer = {
+    'host': '101.132.73.130',
     'port': 3306,
     'user': 'barnett',
     'password': 'xxf99311',
-    'db': 'jobdata',
+    'db': 'proxypool',
     'charset': 'utf8'
 }
 

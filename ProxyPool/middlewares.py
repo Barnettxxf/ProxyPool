@@ -6,11 +6,12 @@ from scrapy import signals
 from scrapy.downloadermiddlewares.useragent import UserAgentMiddleware
 from scrapy.http import HtmlResponse
 from selenium import webdriver
-from .utils.get_ip import GetIp
+from .utils.get_ip import AbtainIp
 
 option = webdriver.ChromeOptions()
 option.set_headless()
-t = GetIp()
+t = AbtainIp()
+
 
 class RotateUserAgentMiddleware(UserAgentMiddleware):
 
@@ -44,7 +45,6 @@ class RotateUserAgentMiddleware(UserAgentMiddleware):
 
 
 class SeleniumMiddleware(object):
-
     driver = webdriver.Chrome(chrome_options=option)
 
     def __init__(self, timeout=10, script_timeout=20):
@@ -53,7 +53,8 @@ class SeleniumMiddleware(object):
 
     @classmethod
     def from_crawler(cls, crawler):
-        return cls(timeout=crawler.settings.get('SELENIUM_TIMEOUT', 10), script_timeout=crawler.settings.get('selenium_script_timeout', 20))
+        return cls(timeout=crawler.settings.get('SELENIUM_TIMEOUT', 10),
+                   script_timeout=crawler.settings.get('selenium_script_timeout', 20))
 
     def spider_opened(self, spider):
         self.driver.set_page_load_timeout(self.timeout)
@@ -94,7 +95,6 @@ class StraightMiddleware(object):
 
 
 class RandomProxyMiddleware(object):
-
     ip_list = t.ip_list
     count = 0
 
@@ -124,9 +124,9 @@ class RandomProxyMiddleware(object):
                         for line in self.ip_list:
                             f.write(str(line))
                         f.write('\n')
-                ip, port = random.choice(self.ip_list)
-                print('new_ip: ', 'https://' + ip + ':' + port)
-                request.meta['proxy'] = 'https://' + ip + ':' + port
+                proxy = random.choice(self.ip_list)
+                print('new_ip: ', 'https://' + proxy.ip + ':' + proxy.port)
+                request.meta['proxy'] = 'https://' + proxy.ip + ':' + proxy.port
 
     def spider_opened(self, spider):
         spider.logger.info('Spider opened: %s' % spider.name)

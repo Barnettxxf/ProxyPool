@@ -12,6 +12,9 @@ from ProxyPool import settings
 from ProxyPool.items import ProxypoolItem
 from ProxyPool.model import loadSession
 from ProxyPool.model.rules import CrawlRules
+from time import time
+
+start_time = time()
 
 
 class StartspiderSpider(scrapy.Spider):
@@ -55,6 +58,7 @@ class StartspiderSpider(scrapy.Spider):
         from _signal import SIGKILL
         msg = 'Spider close: ' + StartspiderSpider.name + '(%s)' % reason
         logging.info(msg)
+        print('Total cost: %s seconds.' % (time() - start_time))
         pid = os.getpid()
         os.kill(pid, SIGKILL)
 
