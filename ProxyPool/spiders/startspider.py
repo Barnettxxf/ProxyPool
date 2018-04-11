@@ -14,6 +14,8 @@ from ProxyPool.model import loadSession
 from ProxyPool.model.rules import CrawlRules
 from time import time
 
+from model.record_run_time import Record
+
 start_time = time()
 
 
@@ -57,9 +59,17 @@ class StartspiderSpider(scrapy.Spider):
         """ shutdown abort startspider, or it will raise exception ... """
         from _signal import SIGKILL
         msg = 'Spider close: ' + StartspiderSpider.name + '(%s)' % reason
-        logging.info(msg)
-        print('Total cost: %s seconds.' % (time() - start_time))
+        logging.info(msg,)
+        cost = time() - start_time
+        session = loadSession()
+        record = Record(
+            crawl_time=str(cost)
+        )
+        session.add(record)
+        session.commit()
+        session.close()
         pid = os.getpid()
+        print('Total cost: %s seconds.' % cost)
         os.kill(pid, SIGKILL)
 
 

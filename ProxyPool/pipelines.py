@@ -77,4 +77,3 @@ class MysqlPipline(object):
             session.commit()
         except PymsqlError as e:
             print('Mysql Error: %s ' % str(e))
-

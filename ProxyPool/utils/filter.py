@@ -6,11 +6,14 @@ import requests
 
 __author__ = 'barnett'
 
+import os, sys; sys.path.append(os.path.dirname(os.getcwd()))
 from model.available import FilterIP
 from model import loadSession, engine, Base
 from model.proxy import Proxy
+from model.filter_success import FilterRecord
 from multiprocessing.dummy import Pool as ThreadPool
-from urllib3 import disable_warnings;
+from urllib3 import disable_warnings
+
 
 disable_warnings()
 
@@ -22,7 +25,7 @@ class Filter(object):
     headers = {
         'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/64.0.3282.167 Chrome/64.0.3282.167 Safari/537.36'}
     https_test_url = 'https://www.baidu.com'
-    http_test_url = 'https://www.meizitu.com'
+    http_test_url = 'http://www.meizitu.com'
 
     def __init__(self, https_test_url=None, http_test_url=None, timeout=10):
         """
@@ -36,12 +39,15 @@ class Filter(object):
             self.https_test_url = https_test_url
         if http_test_url is not None:
             self.http_test_url = http_test_url
+        self.count = 0
 
     def start(self):
         """ use threadpool to filter ip """
         data = self._get_data()
         pool = ThreadPool(8)
         pool.map(self._filter, data)
+        pool.close()
+        pool.join()
 
     def delete_old(self):
         """ delete unavailable ip in FilterIP which have not updated recently """
@@ -50,7 +56,7 @@ class Filter(object):
             now = self.format_time(datetime.datetime.now())
             compare = self.format_time(each.update)
             d = now - compare
-            if d.seconds > 18000: # 5 hours
+            if d.seconds > 18000:  # 5 hours
                 self.session.delete(each)
         self.session.commit()
 
@@ -82,8 +88,9 @@ class Filter(object):
             now = self.format_time(datetime.datetime.now())
             compare = self.format_time(proxy.update)
             d = now - compare
-            if d.seconds < 7200: # 2 hours
+            if d.seconds < 7200:  # 2 hours
                 filter_data.append(proxy)
+        self.count = len(filter_data)
         return filter_data
 
     def _save(self, proxy):
@@ -116,8 +123,17 @@ class Filter(object):
 
 if __name__ == '__main__':
     start = time.time()
-    t = Filter()
+    t = Filter(http_test_url='http://www.xicidaili.com/')
     t.start()
     t.delete_old()
     t.close()
+    cost = time.time() - start
     print('Cost %s secs.' % (time.time() - start))
+    session = loadSession()
+    record = FilterRecord(
+        filter_count=t.count,
+        filter_time=str(cost)
+    )
+    session.add(record)
+    session.commit()
+    session.close()

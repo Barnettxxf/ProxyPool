@@ -3,6 +3,8 @@ from model import Base, engine, loadSession
 from model.rules import CrawlRules
 from model.proxy import Proxy  # 一定要导入此模块，不然proxy表不会在mysql里生成
 from model.available import FilterIP
+from model.filter_success import FilterRecord
+from model.record_run_time import Record
 
 Base.metadata.create_all(engine)
 session = loadSession()
