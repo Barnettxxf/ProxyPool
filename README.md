@@ -11,6 +11,15 @@
 
 ​	`mysql -h 101.132.73.130 -u classmate -p`该命令可以进入数据库proxypool查看或使用该项目获取的IP代理。密码和帐号相同。
 
+​	获得：
+
+| name   | value     |
+| ------ | --------- |
+| 数据库 | MySQL     |
+| 帐号   | classmate |
+| 密码   | classmate |
+| 目标表 | available |
+
 
 
 ### 包模块功能
