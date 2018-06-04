@@ -91,7 +91,9 @@ class Filter(object):
             if d.seconds < 7200:  # 2 hours
                 filter_data.append(proxy)
         self.count = len(filter_data)
-        return filter_data
+        num = self.count // 1000
+        
+        return filter_data[self.count*num*0.03:]
 
     def _save(self, proxy):
         """ make a new session each time to save data for Thread safe """
