@@ -12,6 +12,9 @@ def pipline(item):
             item['speed'] = item['speed'][0].split('秒')[0].strip()
         if 'ms' in item['speed'][0]:
             item['speed'] = int(item['speed'][0].split('ms')[0].strip()) / 1000
+    
+    if item['type'].upper() not in ['HTTP', 'HTTPS', 'HTTP,HTTPS', 'HTTP, HTTPS']:
+        item['type'] = 'HTTPS'
 
     if len(item['lastcheck']) != 0 and isinstance(item['lastcheck'], list):
         item['lastcheck'] = parse_time(item['lastcheck'][0])
