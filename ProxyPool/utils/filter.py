@@ -93,7 +93,7 @@ class Filter(object):
         self.count = len(filter_data)
         num = self.count // 1000
         
-        return filter_data[self.count*num*0.03:]
+        return filter_data[int(self.count*num*0.03):]
 
     def _save(self, proxy):
         """ make a new session each time to save data for Thread safe """
